@@ -153,14 +153,19 @@ def edit_existing_record(catches, player, country_found):
 def delete_record():
     # ask user name of the player to be deleted and try to find a match
     name = input('Enter the name of the player you want to delete: ')
-    player_found = Player.get_or_none(Player.name.contains(name))
+    results = Player.select().where(Player.name.contains(name))
 
     # if there is a match, get id of player and try to delete it from Player table using id
-    if player_found:
-        player_id = player_found.id
+    if results:
+        print('\nLooking for matches...')
+        for result in results:
+            print(f'id: {result.id}, {result.name}, {result.country.name}')
+        player_id = int(input('\nEnter id to delete: '))
+        id_to_delete = player_id
+
         try:
-            Player.delete_by_id(player_id)
-            print(f'{player_found.name} record was deleted')
+            Player.delete_by_id(id_to_delete)
+            print('Player record was deleted')
         except ValueError as err:
             print('Something went wrong: ', err)
     else:
