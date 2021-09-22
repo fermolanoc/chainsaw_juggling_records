@@ -38,12 +38,30 @@ while enter_record.upper() == 'Y':
     player_country = input('Which country does this player represents? ')
     number_of_catches = int(input('Now enter number of catches record: '))
 
-    player_record = (player_country, player_name, number_of_catches)
+    # valid_data = validate_no_empty_inputs(player_name, player_country, number_of_catches)
+
+    player_record = [player_country, [player_name, number_of_catches]]
     data.append(player_record)
 
     enter_record = input(
         "Press 'Y' to add another record or any other key to quit ")
 
 # print(data)
-data_tuple = tuple(data)
-# print(data_tuple)
+for country, player in data:
+    country_found = Country.get_or_none(Country.name == country)
+    if not country_found:
+        country = Country.create(name=country)
+
+        name = player[0]
+        catches = player[1]
+        Player.create(name=name, number_of_catches=catches,
+                      country=country)
+
+
+countries = Country.select()
+for country in countries:
+    print(country.name)
+
+players = Player.select()
+for player in players:
+    print(player.name, player.number_of_catches)
