@@ -49,19 +49,25 @@ while enter_record.upper() == 'Y':
 # print(data)
 for country, player in data:
     country_found = Country.get_or_none(Country.name == country)
+    name = player[0]
+    catches = player[1]
+
     if not country_found:
         country = Country.create(name=country)
 
-        name = player[0]
-        catches = player[1]
         Player.create(name=name, number_of_catches=catches,
                       country=country)
+        print(f'Player {name} created')
+    else:
+        Player.create(name=name, number_of_catches=catches,
+                      country=country_found)
+        print(f'Player {name} created')
 
 
 countries = Country.select()
 for country in countries:
-    print(country.name)
+    print(country, country.name)
 
 players = Player.select()
 for player in players:
-    print(player.name, player.number_of_catches)
+    print(player.name, player.number_of_catches, player.country.name)
