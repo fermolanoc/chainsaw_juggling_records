@@ -27,6 +27,38 @@ class Player(RecordModel):
 db.connect()
 db.create_tables([Country, Player])
 
+
+def validate_no_empty_inputs(name, country, catches):
+    while not name:
+        name = input('Player name cannot be empty: ')
+
+    while not country:
+        country = input('Enter a valid country name: ')
+
+    while not catches:
+        catches = input('Now enter number of catches record: ')
+        try:
+            int(catches)
+        except ValueError:
+            print('Data given is not a number')
+            catches = ''
+
+    return name, country, catches
+
+
+def add_record(data):
+    name = input('Enter player name: ')
+    country = input('Which country does this player represents? ')
+    catches = input('Now enter number of catches record: ')
+
+    player_name, player_country, number_of_catches = validate_no_empty_inputs(
+        name, country, catches)
+
+    player_record = [player_country.title(
+    ), [player_name.title(), number_of_catches]]
+    data.append(player_record)
+
+
 # Empty list to store each player data
 data = []
 
@@ -34,17 +66,10 @@ data = []
 enter_record = input("Press 'Y' to add a record or any other key to quit ")
 
 while enter_record.upper() == 'Y':
-    player_name = input('Enter player name: ')
-    player_country = input('Which country does this player represents? ')
-    number_of_catches = int(input('Now enter number of catches record: '))
-
-    # valid_data = validate_no_empty_inputs(player_name, player_country, number_of_catches)
-
-    player_record = [player_country, [player_name, number_of_catches]]
-    data.append(player_record)
-
+    add_record(data)
     enter_record = input(
         "Press 'Y' to add another record or any other key to quit ")
+
 
 # print(data)
 for country, player in data:
