@@ -55,7 +55,16 @@ def main():
         elif choice == '2':
             add_new_record(data)
         elif choice == '3':
-            edit_existing_record()
+            name = input('Enter player name you want to update: ').title()
+            player_found = Player.get_or_none(Player.name == name)
+
+            if player_found:
+                # print(player_found)
+                country = input(f'Which country {name} represents? ')
+                catches = int(input('Enter new catches record number: '))
+                edit_existing_record(catches, player_found, country)
+            else:
+                print(f'Player {name} is not on our records\n')
         elif choice == '4':
             delete_record()
         elif choice == '5':
@@ -65,7 +74,10 @@ def main():
 
 
 def display_all_records():
-    print('todo display all records')
+    print('List of Players holders of Chainsaw Juggling Record\n')
+    players = Player.select()
+    for player in players:
+        print(player.name, player.number_of_catches, player.country.name)
 
 
 def validate_inputs(name, country, catches):
@@ -123,7 +135,7 @@ def add_new_record(data):
         player_found = Player.get_or_none(Player.name == name)
 
         # If player has been created already, check if new number_of_catches data is higher and update row
-        if player_found and player_found.number_of_catches < int(catches):
+        if player_found and player_found.number_of_catches < catches:
             edit_existing_record(catches, player_found, country_found)
         else:  # Otherwise, create a new player record using country id that was found already
             Player.create(name=name, number_of_catches=catches,
@@ -134,10 +146,6 @@ def add_new_record(data):
 # countries = Country.select()
 # for country in countries:
 #     print(country, country.name)
-
-# players = Player.select()
-# for player in players:
-#     print(player.name, player.number_of_catches, player.country.name)
 
 
 def edit_existing_record(catches, player, country_found):
