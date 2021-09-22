@@ -128,11 +128,14 @@ def add_new_record(data):
                       country=country)
         print(f'Player {name} created')
     else:  # If country is already on Country table, check if player exists already as well
-        player_found = Player.get_or_none(Player.name == name)
+        player_found = Player.get_or_none(Player.name == name.title())
 
-        # If player has been created already, check if new number_of_catches data is higher and update row
-        if player_found and player_found.number_of_catches < catches:
-            edit_existing_record(catches, player_found, country_found)
+        # If player has been created already, check if new number_of_catches data is higher and update column data
+        if player_found and player_found.number_of_catches < int(catches):
+            player_id = player_found.id
+            Player.update(number_of_catches=catches).where(
+                Player.id == player_id).execute()
+            print(f'Player number of catches record was updated')
         else:  # Otherwise, create a new player record using country id that was found already
             Player.create(name=name, number_of_catches=catches,
                           country=country_found)
@@ -142,6 +145,7 @@ def add_new_record(data):
 def edit_existing_record(results):
     print('\nLooking for matches...')
 
+    # For each row that matches the query, print the Player info so user can see id and choose which one to modify/delete
     for result in results:
         print(f'id: {result.id}, {result.name}, {result.country.name}')
 
@@ -149,6 +153,7 @@ def edit_existing_record(results):
     id_to_update = player_id
 
     catches = input('Enter new number of catches record: ')
+    # Update record chosen by user based on id
     Player.update(number_of_catches=int(catches)).where(
         Player.id == id_to_update).execute()
     print(f'Player record was updated')
@@ -179,7 +184,7 @@ def find_player():
     name = input('Enter the name of the player you want to look for: ')
     results = Player.select().where(Player.name.contains(name))
 
-    return results
+    return results  # Return results if any of the query
 
 
 if __name__ == '__main__':
