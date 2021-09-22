@@ -34,7 +34,9 @@ Main function with menu
 
 
 def main():
-    # Empty list to store each player data
+    """ Empty list to store each player data
+    : this list will be used to populate database tables
+    """
     data = []
 
     menu_text = """
@@ -67,6 +69,7 @@ def display_all_records():
 
 
 def validate_inputs(name, country, catches):
+    """ This function will not end until all 3 inputs contain data"""
     while not name:
         name = input('Player name cannot be empty: ')
 
@@ -75,9 +78,9 @@ def validate_inputs(name, country, catches):
 
     while not catches:
         catches = input('Now enter number of catches record: ')
-        try:
+        try:  # Once user has input data, try to cast it to integer to verify is not string
             int(catches)
-        except ValueError:
+        except ValueError:  # if input data is not an integer, print message and clear catches value to keep asking user to enter data
             print('Data given is not a number')
             catches = ''
 
@@ -85,38 +88,47 @@ def validate_inputs(name, country, catches):
 
 
 def add_new_record(data):
+    # Get data from user
     name = input('Enter player name: ')
     country = input('Which country does this player represents? ')
     catches = input('Now enter number of catches record: ')
 
+    # validate that non input is empty and that number_of_catches is converted into integer
     player_name, player_country, number_of_catches = validate_inputs(
         name, country, catches)
 
+    # Create a list with player data
     player_record = [player_country.title(
     ), [player_name.title(), number_of_catches]]
-    data.append(player_record)
-    print('todo add new record. What if user wants to add a record that already exists?')
 
+    data.append(player_record)  # insert player record into data list
+
+    # Read data list to get info and populate tables with it
     for country, player in data:
+        # Check if country already exists on Country table
         country_found = Country.get_or_none(Country.name == country)
+
+        # Get player name and # of catches
         name = player[0]
         catches = player[1]
 
-    if not country_found:
+    if not country_found:  # If country wasn't found on Country table, then create it
         country = Country.create(name=country)
 
+        # Then save player info into Player table, including country id (FK referencing Country table)
         Player.create(name=name, number_of_catches=catches,
                       country=country)
         print(f'Player {name} created')
-    else:
+    else:  # If country is already on Country table, check if player exists already as well
         player_found = Player.get_or_none(Player.name == name)
-        if player_found and Player.number_of_catches < catches:
-            Player.update(number_of_catches=catches).where(
-                name == name and country == country_found)
-        else:
+
+        # If player has been created already, check if new number_of_catches data is higher and update row
+        if player_found and player_found.number_of_catches < int(catches):
+            edit_existing_record(catches, player_found, country_found)
+        else:  # Otherwise, create a new player record using country id that was found already
             Player.create(name=name, number_of_catches=catches,
                           country=country_found)
-            print(f'Player {name} created')
+            print(f'Player {name} has been created')
 
 
 # countries = Country.select()
@@ -128,8 +140,10 @@ def add_new_record(data):
 #     print(player.name, player.number_of_catches, player.country.name)
 
 
-def edit_existing_record():
-    print('todo edit existing record. What if user wants to edit record that does not exist?')
+def edit_existing_record(catches, player, country_found):
+    Player.update(number_of_catches=int(catches)).where(
+        Player.name == player.name and Player.country == country_found).execute()
+    print(f'Player: {player.name} record was updated')
 
 
 def delete_record():
