@@ -59,9 +59,9 @@ def main():
             player_found = Player.get_or_none(Player.name == name)
 
             if player_found:
-                # print(player_found)
-                country = input(f'Which country {name} represents? ')
-                catches = int(input('Enter new catches record number: '))
+                print(player_found)
+                country = input(f'Which country {name} represents? ').title()
+                catches = input('Enter new catches record number: ')
                 edit_existing_record(catches, player_found, country)
             else:
                 print(f'Player {name} is not on our records\n')
@@ -143,19 +143,28 @@ def add_new_record(data):
             print(f'Player {name} has been created')
 
 
-# countries = Country.select()
-# for country in countries:
-#     print(country, country.name)
-
-
 def edit_existing_record(catches, player, country_found):
+    print(catches, player, player.name, country_found)
     Player.update(number_of_catches=int(catches)).where(
         Player.name == player.name and Player.country == country_found).execute()
     print(f'Player: {player.name} record was updated')
 
 
 def delete_record():
-    print('todo delete existing record. What if user wants to delete record that does not exist?')
+    # ask user name of the player to be deleted and try to find a match
+    name = input('Enter the name of the player you want to delete: ')
+    player_found = Player.get_or_none(Player.name.contains(name))
+
+    # if there is a match, get id of player and try to delete it from Player table using id
+    if player_found:
+        player_id = player_found.id
+        try:
+            Player.delete_by_id(player_id)
+            print(f'{player_found.name} record was deleted')
+        except ValueError as err:
+            print('Something went wrong: ', err)
+    else:
+        print(f'{name} was not found on the records')
 
 
 if __name__ == '__main__':
