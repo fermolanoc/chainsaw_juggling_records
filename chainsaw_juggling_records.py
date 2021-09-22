@@ -55,16 +55,12 @@ def main():
         elif choice == '2':
             add_new_record(data)
         elif choice == '3':
-            name = input('Enter player name you want to update: ').title()
-            player_found = Player.get_or_none(Player.name == name)
+            results = find_player()
 
-            if player_found:
-                print(player_found)
-                country = input(f'Which country {name} represents? ').title()
-                catches = input('Enter new catches record number: ')
-                edit_existing_record(catches, player_found, country)
+            if results:
+                edit_existing_record(results)
             else:
-                print(f'Player {name} is not on our records\n')
+                print(f'Player is not on our records\n')
         elif choice == '4':
             delete_record()
         elif choice == '5':
@@ -143,17 +139,23 @@ def add_new_record(data):
             print(f'Player {name} has been created')
 
 
-def edit_existing_record(catches, player, country_found):
-    print(catches, player, player.name, country_found)
+def edit_existing_record(results):
+    print('\nLooking for matches...')
+
+    for result in results:
+        print(f'id: {result.id}, {result.name}, {result.country.name}')
+
+    player_id = int(input('\nEnter id to delete: '))
+    id_to_update = player_id
+
+    catches = input('Enter new number of catches record: ')
     Player.update(number_of_catches=int(catches)).where(
-        Player.name == player.name and Player.country == country_found).execute()
-    print(f'Player: {player.name} record was updated')
+        Player.id == id_to_update).execute()
+    print(f'Player record was updated')
 
 
 def delete_record():
-    # ask user name of the player to be deleted and try to find a match
-    name = input('Enter the name of the player you want to delete: ')
-    results = Player.select().where(Player.name.contains(name))
+    results = find_player()
 
     # if there is a match, get id of player and try to delete it from Player table using id
     if results:
@@ -169,7 +171,15 @@ def delete_record():
         except ValueError as err:
             print('Something went wrong: ', err)
     else:
-        print(f'{name} was not found on the records')
+        print(f'Player was not found on the records')
+
+
+def find_player():
+    # ask user name of the player to be deleted and try to find a match
+    name = input('Enter the name of the player you want to look for: ')
+    results = Player.select().where(Player.name.contains(name))
+
+    return results
 
 
 if __name__ == '__main__':
